@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1065056604708-d2nesajsfitdr9a2jk18i2iidbt7qfhp.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1065056604708-d2nesajsfitdr9a2jk18i2iidbt7qfhp</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCB3Or_mEW18mi01yzl3ex_3aPhWkGQJFc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1065056604708</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.cafedomancer.osake</string>
+	<key>PROJECT_ID</key>
+	<string>osake-da012</string>
+	<key>STORAGE_BUCKET</key>
+	<string>osake-da012.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1065056604708:ios:0f29af0cb4f87e8e10beb1</string>
+</dict>
+</plist>
