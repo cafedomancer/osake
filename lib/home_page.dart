@@ -31,6 +31,20 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final appNameText = Text(
+      'osake',
+      style: Theme.of(
+        context,
+      ).textTheme.headline3,
+    );
+    final signUpButton = ElevatedButton(
+      onPressed: _onSignUp,
+      child: const Text('Sign up'),
+    );
+    final signInButton = TextButton(
+      onPressed: _onSignIn,
+      child: const Text('Sign in'),
+    );
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -38,20 +52,9 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                'osake',
-                style: Theme.of(
-                  context,
-                ).textTheme.headline3,
-              ),
-              ElevatedButton(
-                onPressed: _onSignUp,
-                child: const Text('Sign up'),
-              ),
-              TextButton(
-                onPressed: _onSignIn,
-                child: const Text('Sign in'),
-              ),
+              appNameText,
+              signUpButton,
+              signInButton,
             ],
           ),
         ),

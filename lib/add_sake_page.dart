@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:exif/exif.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class AddSakePage extends StatefulWidget {
   const AddSakePage({super.key});
@@ -38,6 +39,12 @@ class _AddSakePageState extends State<AddSakePage> {
     setState(() {
       _image = File(result.files.single.path!);
     });
+
+    final data = await readExifFromBytes(_image!.readAsBytesSync());
+    final createdAt = DateFormat('yyyy:MM:dd HH:mm:ss')
+        .parse(data['Image DateTime'].toString());
+    _createdAtController.text =
+        DateFormat('yyyy-MM-dd HH:mm').format(createdAt);
   }
 
   _onAddSake() async {

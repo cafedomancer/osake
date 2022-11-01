@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:exif/exif.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -41,6 +42,12 @@ class _EditSakePageState extends State<EditSakePage> {
     setState(() {
       _image = File(result.files.single.path!);
     });
+
+    final data = await readExifFromBytes(_image!.readAsBytesSync());
+    final createdAt = DateFormat('yyyy:MM:dd HH:mm:ss')
+        .parse(data['Image DateTime'].toString());
+    _createdAtController.text =
+        DateFormat('yyyy-MM-dd HH:mm').format(createdAt);
   }
 
   _onEditSake() async {
