@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:osake/sake_list_page.dart';
 
 class EditSakePage extends StatefulWidget {
@@ -21,6 +22,15 @@ class _EditSakePageState extends State<EditSakePage> {
   final _brandController = TextEditingController();
   final _titleController = TextEditingController();
   File? _image;
+  final _createdAtController = TextEditingController();
+
+  @override
+  void dispose() {
+    _brandController.dispose();
+    _titleController.dispose();
+    _createdAtController.dispose();
+    super.dispose();
+  }
 
   _onEditImage() async {
     final result = await FilePicker.platform.pickFiles(
@@ -37,6 +47,9 @@ class _EditSakePageState extends State<EditSakePage> {
     if (!_formKey.currentState!.validate()) return;
     final brand = _brandController.text;
     final title = _titleController.text;
+    final createdAt =
+        Timestamp.fromDate(DateTime.parse(_createdAtController.text));
+    final updatedAt = Timestamp.now();
     await FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -45,7 +58,8 @@ class _EditSakePageState extends State<EditSakePage> {
         .update(<String, dynamic>{
       'brand': brand,
       'title': title,
-      'updatedAt': Timestamp.now(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     });
 
     if (_image != null) {
@@ -153,6 +167,8 @@ class _EditSakePageState extends State<EditSakePage> {
 
           _brandController.text = sake.get('brand');
           _titleController.text = sake.get('title');
+          _createdAtController.text = DateFormat('yyyy-MM-dd HH:mm')
+              .format(sake.get('createdAt').toDate());
 
           final imageField = _image != null
               ? Image.file(_image!)
@@ -176,6 +192,20 @@ class _EditSakePageState extends State<EditSakePage> {
             controller: _titleController,
             decoration: const InputDecoration(labelText: 'Title'),
           );
+          final createdAtField = TextFormField(
+            controller: _createdAtController,
+            decoration: const InputDecoration(
+              labelText: 'Created at',
+              hintText: 'YYYY-MM-DD HH:MM',
+            ),
+            keyboardType: TextInputType.datetime,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter some text';
+              }
+              return null;
+            },
+          );
           final editSakeButton = ElevatedButton(
             onPressed: _onEditSake,
             child: const Text('Edit sake'),
@@ -191,6 +221,7 @@ class _EditSakePageState extends State<EditSakePage> {
                     imageField,
                     brandField,
                     titleField,
+                    createdAtField,
                     editSakeButton,
                   ],
                 ),

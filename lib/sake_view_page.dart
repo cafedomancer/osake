@@ -51,7 +51,7 @@ class _SakeViewPageState extends State<SakeViewPage> {
                 ? Text(sake.get('title'))
                 : const Text('(No title)');
             final createdAt = Text(
-              DateFormat.yMd('ja_JP').format(
+              DateFormat('yyyy-MM-dd HH:mm').format(
                 sake.get('createdAt').toDate(),
               ),
             );

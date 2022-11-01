@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AddSakePage extends StatefulWidget {
   const AddSakePage({super.key});
@@ -18,11 +19,13 @@ class _AddSakePageState extends State<AddSakePage> {
   final _brandController = TextEditingController();
   final _titleController = TextEditingController();
   File? _image;
+  final _createdAtController = TextEditingController();
 
   @override
   void dispose() {
     _brandController.dispose();
     _titleController.dispose();
+    _createdAtController.dispose();
     super.dispose();
   }
 
@@ -42,7 +45,9 @@ class _AddSakePageState extends State<AddSakePage> {
     final brand = _brandController.text;
     final title = _titleController.text;
     final imageURL = '';
-    final createdAt = Timestamp.now();
+    final createdAt = _createdAtController.text.isNotEmpty
+        ? Timestamp.fromDate(DateTime.parse(_createdAtController.text))
+        : Timestamp.now();
     final updatedAt = Timestamp.now();
     final sake = await FirebaseFirestore.instance
         .collection('users')
@@ -70,7 +75,6 @@ class _AddSakePageState extends State<AddSakePage> {
         'imageURL': imageURL,
       });
     }
-
     if (!mounted) return;
     Navigator.pop(context);
   }
@@ -97,6 +101,14 @@ class _AddSakePageState extends State<AddSakePage> {
       controller: _titleController,
       decoration: const InputDecoration(labelText: 'Title'),
     );
+    final createdAtField = TextFormField(
+      controller: _createdAtController,
+      decoration: const InputDecoration(
+        labelText: 'Created at',
+        hintText: 'YYYY-MM-DD HH:MM',
+      ),
+      keyboardType: TextInputType.datetime,
+    );
     final addButton = ElevatedButton(
       onPressed: () {
         _onAddSake();
@@ -116,6 +128,7 @@ class _AddSakePageState extends State<AddSakePage> {
               imageField,
               brandField,
               titleField,
+              createdAtField,
               addButton,
             ],
           ),

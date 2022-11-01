@@ -35,8 +35,6 @@ class _SakeListPageState extends State<SakeListPage> {
 
   @override
   Widget build(BuildContext context) {
-    initializeDateFormatting('ja_JP');
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -62,7 +60,8 @@ class _SakeListPageState extends State<SakeListPage> {
                   ? Text(sake.get('title'))
                   : const Text('(No title)');
               final createdAt = Text(
-                DateFormat.yMd('ja_JP').format(sake.get('createdAt').toDate()),
+                DateFormat('yyyy-MM-dd')
+                    .format(sake.get('createdAt').toDate()),
               );
 
               return ListTile(
