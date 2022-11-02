@@ -44,7 +44,7 @@ class _SakeListPageState extends State<SakeListPage> {
             .collection('users')
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .collection('sakes')
-            .orderBy('createdAt', descending: true)
+            .orderBy('updatedAt')
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.data != null) {

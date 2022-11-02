@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:exif/exif.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:osake/sake_list_page.dart';
 
@@ -42,22 +42,24 @@ class _EditSakePageState extends State<EditSakePage> {
     super.dispose();
   }
 
-  // TODO: refactor
   _onEditImage() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
+    final XFile? file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024.0,
+      maxHeight: 1024.0,
     );
-
-    if (result == null) return;
+    if (file == null) return;
     setState(() {
-      _image = File(result.files.single.path!);
+      _image = File(file.path);
     });
 
     final data = await readExifFromBytes(_image!.readAsBytesSync());
-    final createdAt = DateFormat('yyyy:MM:dd HH:mm:ss')
-        .parse(data['Image DateTime'].toString());
-    _createdAtController.text =
-        DateFormat('yyyy-MM-dd HH:mm').format(createdAt);
+    setState(() {
+      _createdAtController.text = DateFormat('yyyy-MM-dd HH:mm').format(
+        DateFormat('yyyy:MM:dd HH:mm:ss')
+            .parse(data['Image DateTime'].toString()),
+      );
+    });
   }
 
   _onEditSake() async {
