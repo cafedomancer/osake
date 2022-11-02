@@ -38,6 +38,10 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
+  void _onHome() {
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final emailField = TextFormField(
@@ -46,12 +50,8 @@ class _SignInPageState extends State<SignInPage> {
         labelText: 'Email *',
       ),
       keyboardType: TextInputType.emailAddress,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter some text';
-        }
-        return null;
-      },
+      validator: (value) =>
+          (value == null || value.isEmpty) ? 'Please enter some text' : null,
     );
     final passwordField = TextFormField(
       controller: _passwordController,
@@ -60,23 +60,18 @@ class _SignInPageState extends State<SignInPage> {
       ),
       keyboardType: TextInputType.visiblePassword,
       obscureText: true,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter some text';
-        }
-        return null;
-      },
+      validator: (value) =>
+          (value == null || value.isEmpty) ? 'Please enter some text' : null,
     );
     final signInButton = ElevatedButton(
       onPressed: _onSignIn,
       child: const Text('Sign in'),
     );
     final homeButton = TextButton(
-      onPressed: () {
-        Navigator.pop(context);
-      },
+      onPressed: _onHome,
       child: const Text('Home'),
     );
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16),

@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
       'osake',
       style: Theme.of(
         context,
-      ).textTheme.headline3,
+      ).textTheme.displayLarge,
     );
     final signUpButton = ElevatedButton(
       onPressed: _onSignUp,
@@ -45,6 +45,7 @@ class _HomePageState extends State<HomePage> {
       onPressed: _onSignIn,
       child: const Text('Sign in'),
     );
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16),

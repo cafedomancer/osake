@@ -10,9 +10,9 @@ import 'package:intl/intl.dart';
 import 'package:osake/sake_list_page.dart';
 
 class EditSakePage extends StatefulWidget {
-  const EditSakePage({super.key, required this.id});
+  const EditSakePage({super.key, required this.sake});
 
-  final String id;
+  final sake;
 
   @override
   State<EditSakePage> createState() => _EditSakePageState();
@@ -26,6 +26,15 @@ class _EditSakePageState extends State<EditSakePage> {
   final _createdAtController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _brandController.text = widget.sake.get('brand');
+    _titleController.text = widget.sake.get('title');
+    _createdAtController.text = DateFormat('yyyy-MM-dd HH:mm')
+        .format(widget.sake.get('createdAt').toDate());
+  }
+
+  @override
   void dispose() {
     _brandController.dispose();
     _titleController.dispose();
@@ -33,6 +42,7 @@ class _EditSakePageState extends State<EditSakePage> {
     super.dispose();
   }
 
+  // TODO: refactor
   _onEditImage() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
@@ -61,7 +71,7 @@ class _EditSakePageState extends State<EditSakePage> {
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('sakes')
-        .doc(widget.id)
+        .doc(widget.sake.id)
         .update(<String, dynamic>{
       'brand': brand,
       'title': title,
@@ -75,7 +85,7 @@ class _EditSakePageState extends State<EditSakePage> {
           .child('users')
           .child(FirebaseAuth.instance.currentUser!.uid)
           .child('sakes')
-          .child(widget.id)
+          .child(widget.sake.id)
           .child('image');
       await imageRef.putFile(_image!);
       final imageURL = await imageRef.getDownloadURL();
@@ -83,7 +93,7 @@ class _EditSakePageState extends State<EditSakePage> {
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .collection('sakes')
-          .doc(widget.id)
+          .doc(widget.sake.id)
           .update(<String, String>{
         'imageURL': imageURL,
       });
@@ -107,20 +117,13 @@ class _EditSakePageState extends State<EditSakePage> {
           ),
           TextButton(
             onPressed: () async {
-              final sake = await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(FirebaseAuth.instance.currentUser!.uid)
-                  .collection('sakes')
-                  .doc(widget.id)
-                  .get();
-
-              if (!sake.get('imageURL').isEmpty) {
+              if (widget.sake.get('imageURL').isNotEmpty) {
                 await FirebaseStorage.instance
                     .ref()
                     .child('users')
                     .child(FirebaseAuth.instance.currentUser!.uid)
                     .child('sakes')
-                    .child(widget.id)
+                    .child(widget.sake.id)
                     .child('image')
                     .delete();
               }
@@ -129,7 +132,7 @@ class _EditSakePageState extends State<EditSakePage> {
                   .collection('users')
                   .doc(FirebaseAuth.instance.currentUser!.uid)
                   .collection('sakes')
-                  .doc(widget.id)
+                  .doc(widget.sake.id)
                   .delete();
 
               if (!mounted) return;
@@ -154,6 +157,50 @@ class _EditSakePageState extends State<EditSakePage> {
       tooltip: 'Show Snackbar',
       onPressed: _onDeleteSake,
     );
+    final imageField = _image != null
+        ? GestureDetector(
+            child: Image.file(_image!),
+            onTap: _onEditImage,
+          )
+        : widget.sake.get('imageURL').isNotEmpty
+            ? GestureDetector(
+                child: Image.network(widget.sake.get('imageURL')),
+                onTap: _onEditImage,
+              )
+            : IconButton(
+                onPressed: _onEditImage,
+                icon: const Icon(Icons.image),
+              );
+    final brandField = TextFormField(
+      controller: _brandController,
+      decoration: const InputDecoration(
+        labelText: 'Brand *',
+        hintText: '十四代',
+      ),
+      validator: (value) =>
+          (value == null || value.isEmpty) ? 'Please enter some text' : null,
+    );
+    final titleField = TextFormField(
+      controller: _titleController,
+      decoration: const InputDecoration(
+        labelText: 'Title',
+        hintText: '本丸 秘伝玉返し',
+      ),
+    );
+    final createdAtField = TextFormField(
+      controller: _createdAtController,
+      decoration: const InputDecoration(
+        labelText: 'Created at',
+        hintText: 'YYYY-MM-DD HH:MM',
+      ),
+      keyboardType: TextInputType.datetime,
+      validator: (value) =>
+          (value == null || value.isEmpty) ? 'Please enter some text' : null,
+    );
+    final editSakeButton = ElevatedButton(
+      onPressed: _onEditSake,
+      child: const Text('Edit sake'),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -162,80 +209,22 @@ class _EditSakePageState extends State<EditSakePage> {
           deleteSakeButton,
         ],
       ),
-      body: StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .collection('sakes')
-            .doc(widget.id)
-            .snapshots(),
-        builder: (context, snapshot) {
-          final sake = snapshot.data!;
-
-          _brandController.text = sake.get('brand');
-          _titleController.text = sake.get('title');
-          _createdAtController.text = DateFormat('yyyy-MM-dd HH:mm')
-              .format(sake.get('createdAt').toDate());
-
-          final imageField = _image != null
-              ? Image.file(_image!)
-              : !sake.get('imageURL').isEmpty
-                  ? Image.network(sake.get('imageURL'))
-                  : IconButton(
-                      onPressed: _onEditImage,
-                      icon: const Icon(Icons.image),
-                    );
-          final brandField = TextFormField(
-            controller: _brandController,
-            decoration: const InputDecoration(labelText: 'Brand *'),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter some text';
-              }
-              return null;
-            },
-          );
-          final titleField = TextFormField(
-            controller: _titleController,
-            decoration: const InputDecoration(labelText: 'Title'),
-          );
-          final createdAtField = TextFormField(
-            controller: _createdAtController,
-            decoration: const InputDecoration(
-              labelText: 'Created at',
-              hintText: 'YYYY-MM-DD HH:MM',
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Center(
+            child: ListView(
+              children: <Widget>[
+                imageField,
+                brandField,
+                titleField,
+                createdAtField,
+                editSakeButton,
+              ],
             ),
-            keyboardType: TextInputType.datetime,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter some text';
-              }
-              return null;
-            },
-          );
-          final editSakeButton = ElevatedButton(
-            onPressed: _onEditSake,
-            child: const Text('Edit sake'),
-          );
-
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Center(
-                child: ListView(
-                  children: <Widget>[
-                    imageField,
-                    brandField,
-                    titleField,
-                    createdAtField,
-                    editSakeButton,
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

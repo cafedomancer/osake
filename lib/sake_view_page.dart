@@ -7,28 +7,26 @@ import 'package:intl/intl.dart';
 import 'edit_sake_page.dart';
 
 class SakeViewPage extends StatefulWidget {
-  const SakeViewPage({super.key, required this.id});
+  const SakeViewPage({super.key, required this.sake});
 
-  final String id;
+  final sake;
 
   @override
   State<SakeViewPage> createState() => _SakeViewPageState();
 }
 
 class _SakeViewPageState extends State<SakeViewPage> {
-  void _onEditSake(id) {
+  void _onEditSake(sake) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditSakePage(id: id),
+        builder: (context) => EditSakePage(sake: sake),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    initializeDateFormatting('ja_JP');
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('osake'),
@@ -38,38 +36,52 @@ class _SakeViewPageState extends State<SakeViewPage> {
               .collection('users')
               .doc(FirebaseAuth.instance.currentUser!.uid)
               .collection('sakes')
-              .doc(widget.id)
+              .doc(widget.sake.id)
               .snapshots(),
           builder: (context, snapshot) {
-            final sake = snapshot.data!;
+            if (snapshot.data != null) {
+              final sake = snapshot.data!;
 
-            final image = !sake.get('imageURL').isEmpty
-                ? Image.network(sake.get('imageURL'))
-                : const Icon(Icons.image);
-            final brand = Text(sake.get('brand'));
-            final title = !sake.get('title').isEmpty
-                ? Text(sake.get('title'))
-                : const Text('(No title)');
-            final createdAt = Text(
-              DateFormat('yyyy-MM-dd HH:mm').format(
-                sake.get('createdAt').toDate(),
-              ),
-            );
+              final image = sake.get('imageURL').isNotEmpty
+                  ? Image.network(sake.get('imageURL'))
+                  : const Icon(Icons.image); // TODO
+              final brand = Text(sake.get('brand'));
+              final title = sake.get('title').isNotEmpty
+                  ? Text(sake.get('title'))
+                  : const Text('(No title)');
+              final createdAt = Text(
+                DateFormat('yyyy-MM-dd HH:mm').format(
+                  sake.get('createdAt').toDate(),
+                ),
+              );
 
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: ListView(
-                children: <Widget>[
-                  image,
-                  brand,
-                  title,
-                  createdAt,
-                ],
-              ),
-            );
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: ListView(
+                  children: <Widget>[
+                    image,
+                    brand,
+                    title,
+                    createdAt,
+                  ],
+                ),
+              );
+            } else {
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                ),
+              );
+            }
           }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _onEditSake(widget.id),
+        onPressed: () => _onEditSake(widget.sake),
         child: const Icon(Icons.edit),
       ),
     );

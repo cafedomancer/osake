@@ -30,6 +30,7 @@ class _AddSakePageState extends State<AddSakePage> {
     super.dispose();
   }
 
+  // TODO: refactor
   _onAddImage() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
@@ -82,6 +83,7 @@ class _AddSakePageState extends State<AddSakePage> {
         'imageURL': imageURL,
       });
     }
+
     if (!mounted) return;
     Navigator.pop(context);
   }
@@ -89,24 +91,29 @@ class _AddSakePageState extends State<AddSakePage> {
   @override
   Widget build(BuildContext context) {
     final imageField = _image != null
-        ? Image.file(_image!)
+        ? GestureDetector(
+            child: Image.file(_image!),
+            onTap: _onAddImage,
+          )
         : IconButton(
             onPressed: _onAddImage,
             icon: const Icon(Icons.image),
           );
     final brandField = TextFormField(
       controller: _brandController,
-      decoration: const InputDecoration(labelText: 'Brand *'),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter some text';
-        }
-        return null;
-      },
+      decoration: const InputDecoration(
+        labelText: 'Brand *',
+        hintText: '十四代',
+      ),
+      validator: (value) =>
+          (value == null || value.isEmpty) ? 'Please enter some text' : null,
     );
     final titleField = TextFormField(
       controller: _titleController,
-      decoration: const InputDecoration(labelText: 'Title'),
+      decoration: const InputDecoration(
+        labelText: 'Title',
+        hintText: '本丸 秘伝玉返し',
+      ),
     );
     final createdAtField = TextFormField(
       controller: _createdAtController,
@@ -116,12 +123,11 @@ class _AddSakePageState extends State<AddSakePage> {
       ),
       keyboardType: TextInputType.datetime,
     );
-    final addButton = ElevatedButton(
-      onPressed: () {
-        _onAddSake();
-      },
+    final addSakeButton = ElevatedButton(
+      onPressed: () => _onAddSake(),
       child: const Text('Add sake'),
     );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('osake'),
@@ -136,7 +142,7 @@ class _AddSakePageState extends State<AddSakePage> {
               brandField,
               titleField,
               createdAtField,
-              addButton,
+              addSakeButton,
             ],
           ),
         ),
