@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:exif/exif.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -165,7 +166,12 @@ class _EditSakePageState extends State<EditSakePage> {
           )
         : widget.sake.get('imageURL').isNotEmpty
             ? GestureDetector(
-                child: Image.network(widget.sake.get('imageURL')),
+                child: CachedNetworkImage(
+                  imageUrl: widget.sake.get('imageURL'),
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
                 onTap: _onEditImage,
               )
             : IconButton(
@@ -219,7 +225,50 @@ class _EditSakePageState extends State<EditSakePage> {
               children: <Widget>[
                 imageField,
                 brandField,
+                StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('sakes')
+                      .orderBy('createdAt')
+                      .limit(10)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.data != null) {
+                      return Wrap(
+                        children: snapshot.data!.docs
+                            .map(
+                              (sake) => ActionChip(
+                                label: Text(sake.get('brand')),
+                                onPressed: () =>
+                                    _brandController.text = sake.get('brand'),
+                              ),
+                            )
+                            .toList(),
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  },
+                ),
                 titleField,
+                Wrap(
+                  children: [
+                    '純米大吟醸',
+                    '純米吟醸',
+                    '特別純米',
+                    '純米',
+                    '大吟醸',
+                    '吟醸',
+                    '特別本醸造',
+                    '本醸造'
+                  ]
+                      .map(
+                        (label) => ActionChip(
+                          label: Text(label),
+                          onPressed: () => _titleController.text = label,
+                        ),
+                      )
+                      .toList(),
+                ),
                 createdAtField,
                 editSakeButton,
               ],

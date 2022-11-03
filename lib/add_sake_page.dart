@@ -143,7 +143,42 @@ class _AddSakePageState extends State<AddSakePage> {
             children: <Widget>[
               imageField,
               brandField,
+              StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('sakes')
+                    .orderBy('createdAt')
+                    .limit(10)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.data != null) {
+                    return Wrap(
+                      children: snapshot.data!.docs
+                          .map(
+                            (sake) => ActionChip(
+                              label: Text(sake.get('brand')),
+                              onPressed: () =>
+                                  _brandController.text = sake.get('brand'),
+                            ),
+                          )
+                          .toList(),
+                    );
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                },
+              ),
               titleField,
+              Wrap(
+                children:
+                    ['純米大吟醸', '純米吟醸', '特別純米', '純米', '大吟醸', '吟醸', '特別本醸造', '本醸造']
+                        .map(
+                          (label) => ActionChip(
+                            label: Text(label),
+                            onPressed: () => _titleController.text = label,
+                          ),
+                        )
+                        .toList(),
+              ),
               createdAtField,
               addSakeButton,
             ],

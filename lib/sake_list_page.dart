@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +87,13 @@ class _SakeListPageState extends State<SakeListPage> {
                 final sake = snapshot.data!.docs[index];
 
                 final image = sake.get('imageURL').isNotEmpty
-                    ? Image.network(sake.get('imageURL'))
+                    ? CachedNetworkImage(
+                        imageUrl: sake.get('imageURL'),
+                        placeholder: (context, url) =>
+                            const CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error),
+                      )
                     : const Icon(Icons.image); // TODO
                 final brand = Text(sake.get('brand'));
                 final title = sake.get('title').isNotEmpty
