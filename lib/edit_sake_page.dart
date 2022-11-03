@@ -156,7 +156,6 @@ class _EditSakePageState extends State<EditSakePage> {
   Widget build(BuildContext context) {
     final deleteSakeButton = IconButton(
       icon: const Icon(Icons.delete),
-      tooltip: 'Show Snackbar',
       onPressed: _onDeleteSake,
     );
     final imageField = _image != null

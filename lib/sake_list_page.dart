@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,16 @@ class SakeListPage extends StatefulWidget {
 }
 
 class _SakeListPageState extends State<SakeListPage> {
+  String _field = 'brand';
+  bool _descending = false;
+
+  void _onSortSake(field) {
+    setState(() {
+      _field = field;
+      _descending = !_descending;
+    });
+  }
+
   void _onSakeView(sake) {
     Navigator.push(
       context,
@@ -34,17 +46,38 @@ class _SakeListPageState extends State<SakeListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final sortSakeButton = PopupMenuButton(
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          onTap: () => _onSortSake('brand'),
+          child: const Text('Brand'),
+        ),
+        PopupMenuItem(
+          onTap: () => _onSortSake('createdAt'),
+          child: const Text('Created at'),
+        ),
+        PopupMenuItem(
+          onTap: () => _onSortSake('updatedAt'),
+          child: const Text('Updated at'),
+        ),
+      ],
+      icon: const Icon(Icons.sort),
+    );
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text('osake'),
+        actions: <Widget>[
+          sortSakeButton,
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('users')
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .collection('sakes')
-            .orderBy('updatedAt')
+            .orderBy(_field, descending: _descending)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.data != null) {
