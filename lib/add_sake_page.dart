@@ -17,18 +17,10 @@ class AddSakePage extends StatefulWidget {
 
 class _AddSakePageState extends State<AddSakePage> {
   final _formKey = GlobalKey<FormState>();
-  final _brandController = TextEditingController();
-  final _titleController = TextEditingController();
+  String? _brand = '';
+  String? _title = '';
   File? _image;
-  final _createdAtController = TextEditingController();
-
-  @override
-  void dispose() {
-    _brandController.dispose();
-    _titleController.dispose();
-    _createdAtController.dispose();
-    super.dispose();
-  }
+  String? _createdAt = '';
 
   _onAddImage() async {
     final XFile? file = await ImagePicker().pickImage(
@@ -43,8 +35,7 @@ class _AddSakePageState extends State<AddSakePage> {
 
     final data = await readExifFromBytes(_image!.readAsBytesSync());
     setState(() {
-      print(data);
-      _createdAtController.text = DateFormat('yyyy-MM-dd HH:mm').format(
+      _createdAt = DateFormat('yyyy-MM-dd HH:mm').format(
         DateFormat('yyyy:MM:dd HH:mm:ss')
             .parse(data['Image DateTime'].toString()),
       );
@@ -53,11 +44,11 @@ class _AddSakePageState extends State<AddSakePage> {
 
   _onAddSake() async {
     if (!_formKey.currentState!.validate()) return;
-    final brand = _brandController.text;
-    final title = _titleController.text;
+    final brand = _brand;
+    final title = _title;
     final imageURL = '';
-    final createdAt = _createdAtController.text.isNotEmpty
-        ? Timestamp.fromDate(DateTime.parse(_createdAtController.text))
+    final createdAt = _createdAt!.isNotEmpty
+        ? Timestamp.fromDate(DateTime.parse(_createdAt!))
         : Timestamp.now();
     final updatedAt = Timestamp.now();
     final sake = await FirebaseFirestore.instance
@@ -103,28 +94,41 @@ class _AddSakePageState extends State<AddSakePage> {
             icon: const Icon(Icons.image),
           );
     final brandField = TextFormField(
-      controller: _brandController,
+      initialValue: _brand,
       decoration: const InputDecoration(
         labelText: 'Brand *',
         hintText: '十四代',
       ),
+      onChanged: (value) {
+        setState(() {
+          _brand = value;
+        });
+      },
       validator: (value) =>
           (value == null || value.isEmpty) ? 'Please enter some text' : null,
     );
     final titleField = TextFormField(
-      controller: _titleController,
       decoration: const InputDecoration(
         labelText: 'Title',
         hintText: '本丸 秘伝玉返し',
       ),
+      onChanged: (value) {
+        setState(() {
+          _title = value;
+        });
+      },
     );
     final createdAtField = TextFormField(
-      controller: _createdAtController,
       decoration: const InputDecoration(
         labelText: 'Created at',
         hintText: 'YYYY-MM-DD HH:MM',
       ),
       keyboardType: TextInputType.datetime,
+      onChanged: (value) {
+        setState(() {
+          _createdAt = value;
+        });
+      },
     );
     final addSakeButton = ElevatedButton(
       onPressed: () => _onAddSake(),
@@ -144,11 +148,23 @@ class _AddSakePageState extends State<AddSakePage> {
               imageField,
               brandField,
               StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('sakes')
-                    .orderBy('createdAt')
-                    .limit(10)
-                    .snapshots(),
+                stream: _brand!.isNotEmpty
+                    ? FirebaseFirestore.instance
+                        .collection('sakes')
+                        .orderBy(RegExp(r'^[0-9A-Za-z]+$').hasMatch(_brand!)
+                            ? 'brandRomaji'
+                            : RegExp(r'^[あ-ん]+$').hasMatch(_brand!)
+                                ? 'brandKana'
+                                : 'brand')
+                        .startAt([_brand])
+                        .endAt(['$_brand\uf8ff'])
+                        .limit(10)
+                        .snapshots()
+                    : FirebaseFirestore.instance
+                        .collection('sakes')
+                        .orderBy('createdAt')
+                        .limit(10)
+                        .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.data != null) {
                     return Wrap(
@@ -156,8 +172,11 @@ class _AddSakePageState extends State<AddSakePage> {
                           .map(
                             (sake) => ActionChip(
                               label: Text(sake.get('brand')),
-                              onPressed: () =>
-                                  _brandController.text = sake.get('brand'),
+                              onPressed: () {
+                                setState(() {
+                                  _brand = sake.get('brand');
+                                });
+                              },
                             ),
                           )
                           .toList(),
@@ -174,7 +193,11 @@ class _AddSakePageState extends State<AddSakePage> {
                         .map(
                           (label) => ActionChip(
                             label: Text(label),
-                            onPressed: () => _titleController.text = label,
+                            onPressed: () {
+                              setState(() {
+                                _title = label;
+                              });
+                            },
                           ),
                         )
                         .toList(),
