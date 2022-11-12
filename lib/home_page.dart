@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:osake/sake_list_page.dart';
 
 import 'sign_in_page.dart';
 import 'sign_up_page.dart';
@@ -47,18 +49,27 @@ class _HomePageState extends State<HomePage> {
     );
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              appNameText,
-              signUpButton,
-              signInButton,
-            ],
-          ),
-        ),
+      body: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: ((context, snapshot) {
+          if (snapshot.hasData) {
+            return const SakeListPage();
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    appNameText,
+                    signUpButton,
+                    signInButton,
+                  ],
+                ),
+              ),
+            );
+          }
+        }),
       ),
     );
   }
