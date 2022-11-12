@@ -17,13 +17,13 @@ class SakeListPage extends StatefulWidget {
 }
 
 class _SakeListPageState extends State<SakeListPage> {
-  String _field = 'brand';
-  bool _descending = false;
+  String _field = 'createdAt';
+  bool _descending = true;
 
   void _onSortSake(field) {
     setState(() {
+      if (_field == field) _descending = !_descending;
       _field = field;
-      _descending = !_descending;
     });
   }
 

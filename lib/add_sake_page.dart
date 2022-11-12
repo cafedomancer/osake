@@ -17,7 +17,9 @@ class AddSakePage extends StatefulWidget {
 
 class _AddSakePageState extends State<AddSakePage> {
   final _formKey = GlobalKey<FormState>();
+  TextEditingController _brandController = TextEditingController();
   String? _brand = '';
+  TextEditingController _titleController = TextEditingController();
   String? _title = '';
   File? _image;
   String? _createdAt = '';
@@ -94,10 +96,19 @@ class _AddSakePageState extends State<AddSakePage> {
             icon: const Icon(Icons.image),
           );
     final brandField = TextFormField(
-      initialValue: _brand,
-      decoration: const InputDecoration(
+      controller: _brandController,
+      decoration: InputDecoration(
         labelText: 'Brand *',
         hintText: '十四代',
+        suffixIcon: IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            _brandController.clear();
+            setState(() {
+              _brand = '';
+            });
+          },
+        ),
       ),
       onChanged: (value) {
         setState(() {
@@ -108,9 +119,19 @@ class _AddSakePageState extends State<AddSakePage> {
           (value == null || value.isEmpty) ? 'Please enter some text' : null,
     );
     final titleField = TextFormField(
-      decoration: const InputDecoration(
+      controller: _titleController,
+      decoration: InputDecoration(
         labelText: 'Title',
         hintText: '本丸 秘伝玉返し',
+        suffixIcon: IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            _titleController.clear();
+            setState(() {
+              _title = '';
+            });
+          },
+        ),
       ),
       onChanged: (value) {
         setState(() {
@@ -173,6 +194,7 @@ class _AddSakePageState extends State<AddSakePage> {
                             (sake) => ActionChip(
                               label: Text(sake.get('brand')),
                               onPressed: () {
+                                _brandController.text = sake.get('brand');
                                 setState(() {
                                   _brand = sake.get('brand');
                                 });
@@ -194,6 +216,7 @@ class _AddSakePageState extends State<AddSakePage> {
                           (label) => ActionChip(
                             label: Text(label),
                             onPressed: () {
+                              _titleController.text = label;
                               setState(() {
                                 _title = label;
                               });
